@@ -4,7 +4,7 @@ public class UpdateParkingRecordDto
 
     public DateTimeOffset EntryTime { get; set; }
 
-    public DateTimeOffset ExitTime { get; set; }
+    public DateTimeOffset? ExitTime { get; set; }
 
     public decimal EstimatedFee { get; set; }
 

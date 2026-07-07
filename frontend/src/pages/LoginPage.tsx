@@ -56,7 +56,6 @@ export const LoginPage: React.FC = () => {
   return (
     <div className='min-h-screen flex items-center justify-center bg-background text-foreground px-4 select-none'>
       <div className='w-full max-w-md p-8 rounded-2xl border border-border bg-card shadow-xl relative overflow-hidden transition-all duration-300'>
-
         {/* Decorative subtle ambient lights */}
         <div className='absolute -top-16 -left-16 w-32 h-32 rounded-full bg-primary/10 blur-2xl pointer-events-none'></div>
         <div className='absolute -bottom-16 -right-16 w-32 h-32 rounded-full bg-primary/10 blur-2xl pointer-events-none'></div>
@@ -67,7 +66,7 @@ export const LoginPage: React.FC = () => {
             <Bike className='w-8 h-8' />
           </div>
           <h1 className='text-3xl font-heading font-bold text-foreground m-0 tracking-tight text-center'>
-            Sign in to MotoPark
+            Sign in to AbamsPark
           </h1>
           <p className='text-sm text-muted-foreground mt-1.5 text-center'>
             Manage your motorcycle parking records easily

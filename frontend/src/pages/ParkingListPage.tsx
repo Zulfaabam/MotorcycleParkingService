@@ -19,9 +19,11 @@ import {
   Clock,
   EyeOff,
   ClipboardList,
-  X,
+  Edit2,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { CheckInModal } from '../components/CheckInModal'
+import { ConfirmModal } from '../components/ConfirmModal'
 
 export const ParkingListPage: React.FC = () => {
   const queryClient = useQueryClient()
@@ -30,8 +32,12 @@ export const ParkingListPage: React.FC = () => {
     'all' | 'active' | 'completed'
   >('all')
   const [isCheckInOpen, setIsCheckInOpen] = useState(false)
-  const [licensePlate, setLicensePlate] = useState('')
-  const [isNeedWashing, setIsNeedWashing] = useState(false)
+  const [modalMode, setModalMode] = useState<'add' | 'edit'>('add')
+  const [editingRecord, setEditingRecord] = useState<ParkingRecordDto | null>(null)
+  
+  // Confirmation Modal State
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false)
+  const [recordToDelete, setRecordToDelete] = useState<string | null>(null)
 
   // Fetch parking records
   const {
@@ -53,8 +59,6 @@ export const ParkingListPage: React.FC = () => {
       if (res.success) {
         toast.success('Motorcycle checked in successfully')
         setIsCheckInOpen(false)
-        setLicensePlate('')
-        setIsNeedWashing(false)
         queryClient.invalidateQueries({ queryKey: ['parkingRecords'] })
       } else {
         toast.error(res.errors[0] || 'Check-in failed')
@@ -63,6 +67,24 @@ export const ParkingListPage: React.FC = () => {
     onError: (err: any) => {
       const errorMsg = err.response?.data?.errors?.[0] || 'Failed to check in'
       toast.error(errorMsg)
+    },
+  })
+
+  const editMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateParkingRecordDto }) =>
+      parkingApi.update(id, data),
+    onSuccess: (res) => {
+      if (res.success) {
+        toast.success('Record updated successfully')
+        setIsCheckInOpen(false)
+        setEditingRecord(null)
+        queryClient.invalidateQueries({ queryKey: ['parkingRecords'] })
+      } else {
+        toast.error(res.errors[0] || 'Update failed')
+      }
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.errors?.[0] || 'Failed to update record')
     },
   })
 
@@ -89,13 +111,17 @@ export const ParkingListPage: React.FC = () => {
     onSuccess: (res) => {
       if (res.success) {
         toast.success('Record deleted successfully')
+        setIsConfirmOpen(false)
+        setRecordToDelete(null)
         queryClient.invalidateQueries({ queryKey: ['parkingRecords'] })
       } else {
         toast.error(res.errors[0] || 'Failed to delete record')
+        setIsConfirmOpen(false)
       }
     },
     onError: () => {
       toast.error('Failed to delete record')
+      setIsConfirmOpen(false)
     },
   })
 
@@ -121,19 +147,49 @@ export const ParkingListPage: React.FC = () => {
     return matchesSearch
   })
 
-  const handleCheckInSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!licensePlate.trim()) {
+  const handleSubmit = (data: {
+    licensePlate: string
+    isNeedWashing: boolean
+    notes: string
+  }) => {
+    if (!data.licensePlate.trim()) {
       toast.error('License plate is required')
       return
     }
 
-    const entryTime = new Date().toISOString()
-    checkInMutation.mutate({
-      motorcycleLicensePlate: licensePlate.toUpperCase(),
-      entryTime,
-      isNeedWashing,
-    })
+    if (modalMode === 'add') {
+      const entryTime = new Date().toISOString()
+      checkInMutation.mutate({
+        motorcycleLicensePlate: data.licensePlate.toUpperCase(),
+        entryTime,
+        isNeedWashing: data.isNeedWashing,
+        notes: data.notes,
+      })
+    } else if (modalMode === 'edit' && editingRecord) {
+      editMutation.mutate({
+        id: editingRecord.id,
+        data: {
+          motorcycleLicensePlate: data.licensePlate.toUpperCase(),
+          entryTime: editingRecord.entryTime,
+          exitTime: editingRecord.exitTime,
+          estimatedFee: editingRecord.estimatedFee,
+          isNeedWashing: data.isNeedWashing,
+          notes: data.notes,
+        },
+      })
+    }
+  }
+
+  const handleAddClick = () => {
+    setModalMode('add')
+    setEditingRecord(null)
+    setIsCheckInOpen(true)
+  }
+
+  const handleEditClick = (record: ParkingRecordDto) => {
+    setModalMode('edit')
+    setEditingRecord(record)
+    setIsCheckInOpen(true)
   }
 
   const handleCheckOut = (record: ParkingRecordDto) => {
@@ -148,11 +204,14 @@ export const ParkingListPage: React.FC = () => {
     checkOutMutation.mutate({ id: record.id, data })
   }
 
-  const handleDelete = (id: string) => {
-    if (
-      window.confirm('Are you sure you want to delete this parking record?')
-    ) {
-      deleteMutation.mutate(id)
+  const handleDeleteClick = (id: string) => {
+    setRecordToDelete(id)
+    setIsConfirmOpen(true)
+  }
+
+  const confirmDelete = () => {
+    if (recordToDelete) {
+      deleteMutation.mutate(recordToDelete)
     }
   }
 
@@ -180,10 +239,10 @@ export const ParkingListPage: React.FC = () => {
         <div>
           <h1 className='text-3xl font-heading font-bold text-foreground m-0 tracking-tight flex items-center gap-3'>
             <ClipboardList className='w-8 h-8 text-primary' />
-            Parking Logs
+            Parking Records
           </h1>
           <p className='text-sm text-muted-foreground mt-1'>
-            Real-time overview of parked motorcycles and washing queue
+            A list of parked motorcycles in AbamsPark
           </p>
         </div>
         <div className='flex gap-2'>
@@ -197,7 +256,7 @@ export const ParkingListPage: React.FC = () => {
             />
           </button>
           <button
-            onClick={() => setIsCheckInOpen(true)}
+            onClick={handleAddClick}
             className='flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 font-medium text-sm transition-all cursor-pointer shadow-sm'
           >
             <Plus className='w-4 h-4' />
@@ -207,7 +266,7 @@ export const ParkingListPage: React.FC = () => {
       </div>
 
       {/* Metrics Section */}
-      <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
+      {/* <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
         <div className='p-6 rounded-xl border border-border bg-card shadow-sm relative overflow-hidden flex items-center gap-4'>
           <div className='p-3 rounded-lg bg-green-500/10 text-green-500 border border-green-500/20'>
             <Bike className='w-6 h-6' />
@@ -249,7 +308,7 @@ export const ParkingListPage: React.FC = () => {
             </h3>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Filter and Search Bar */}
       <div className='flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 p-4 rounded-xl border border-border bg-card shadow-sm'>
@@ -314,7 +373,10 @@ export const ParkingListPage: React.FC = () => {
           <tbody className='divide-y divide-border'>
             {isLoading ? (
               <tr>
-                <td colSpan={7} className='p-8 text-center text-muted-foreground'>
+                <td
+                  colSpan={7}
+                  className='p-8 text-center text-muted-foreground'
+                >
                   <div className='flex items-center justify-center gap-2'>
                     <RefreshCw className='w-5 h-5 animate-spin text-primary' />
                     <span>Loading logs...</span>
@@ -323,7 +385,10 @@ export const ParkingListPage: React.FC = () => {
               </tr>
             ) : filteredRecords.length === 0 ? (
               <tr>
-                <td colSpan={7} className='p-12 text-center text-muted-foreground'>
+                <td
+                  colSpan={7}
+                  className='p-12 text-center text-muted-foreground'
+                >
                   <div className='flex flex-col items-center gap-2'>
                     <EyeOff className='w-8 h-8 text-muted-foreground/50' />
                     <span className='font-medium text-foreground'>
@@ -411,7 +476,14 @@ export const ParkingListPage: React.FC = () => {
                         </button>
                       )}
                       <button
-                        onClick={() => handleDelete(record.id)}
+                        onClick={() => handleEditClick(record)}
+                        className='p-1 rounded text-blue-300 hover:bg-blue-50 border border-transparent hover:border-blue-200 transition-all cursor-pointer'
+                        title='Edit log'
+                      >
+                        <Edit2 className='w-4 h-4' />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteClick(record.id)}
                         className='p-1 rounded text-destructive hover:bg-destructive/10 border border-transparent hover:border-destructive/20 transition-all cursor-pointer'
                         title='Delete log'
                       >
@@ -427,77 +499,34 @@ export const ParkingListPage: React.FC = () => {
       </div>
 
       {/* Check In Modal */}
-      {isCheckInOpen && (
-        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4'>
-          <div className='relative w-full max-w-md p-6 rounded-2xl border border-border bg-card shadow-2xl animate-in fade-in-50 zoom-in-95 duration-200'>
-            <button
-              onClick={() => setIsCheckInOpen(false)}
-              className='absolute right-4 top-4 p-1.5 rounded-full hover:bg-primary/10 text-muted-foreground hover:text-foreground transition-all cursor-pointer'
-            >
-              <X className='w-4 h-4' />
-            </button>
+      <CheckInModal
+        isOpen={isCheckInOpen}
+        onClose={() => setIsCheckInOpen(false)}
+        onSubmit={handleSubmit}
+        isSubmitting={modalMode === 'add' ? checkInMutation.isPending : editMutation.isPending}
+        mode={modalMode}
+        initialData={
+          editingRecord
+            ? {
+                licensePlate: editingRecord.motorcycleLicensePlate,
+                isNeedWashing: editingRecord.isNeedWashing,
+                notes: editingRecord.notes || '',
+              }
+            : null
+        }
+      />
 
-            <h2 className='text-xl font-heading font-bold text-foreground m-0 mb-1 flex items-center gap-2'>
-              <Bike className='w-5 h-5 text-primary' />
-              Check In Motorcycle
-            </h2>
-            <p className='text-xs text-muted-foreground mb-6'>
-              Create a new entry log in the parking system
-            </p>
-
-            <form onSubmit={handleCheckInSubmit} className='space-y-4'>
-              <div>
-                <label className='block text-xs font-semibold text-foreground uppercase tracking-wider mb-2'>
-                  License Plate
-                </label>
-                <input
-                  type='text'
-                  value={licensePlate}
-                  onChange={(e) => setLicensePlate(e.target.value)}
-                  placeholder='e.g. B 1234 ABC'
-                  className='w-full px-3 py-2.5 rounded-lg border border-border bg-transparent text-foreground text-sm focus:outline-none focus:border-primary uppercase tracking-wide'
-                  required
-                />
-              </div>
-
-              <div className='flex items-center gap-2.5 p-3 rounded-lg border border-border bg-muted/30'>
-                <input
-                  type='checkbox'
-                  id='wash'
-                  checked={isNeedWashing}
-                  onChange={(e) => setIsNeedWashing(e.target.checked)}
-                  className='rounded border-border text-primary focus:ring-primary'
-                />
-                <label
-                  htmlFor='wash'
-                  className='text-sm text-foreground font-medium cursor-pointer select-none'
-                >
-                  Request Motorcycle Wash (+Rp 10.000)
-                </label>
-              </div>
-
-              <div className='flex justify-end gap-2 pt-2'>
-                <button
-                  type='button'
-                  onClick={() => setIsCheckInOpen(false)}
-                  className='px-4 py-2 rounded-lg border border-border text-muted-foreground hover:text-foreground text-sm cursor-pointer'
-                >
-                  Cancel
-                </button>
-                <button
-                  type='submit'
-                  disabled={checkInMutation.isPending}
-                  className='px-4 py-2 rounded-lg bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 font-medium text-sm cursor-pointer'
-                >
-                  {checkInMutation.isPending
-                    ? 'Submitting...'
-                    : 'Register Entry'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={isConfirmOpen}
+        title="Delete Parking Record"
+        message="Are you sure you want to delete this parking record? This action cannot be undone."
+        confirmText="Delete"
+        onConfirm={confirmDelete}
+        onCancel={() => setIsConfirmOpen(false)}
+        isProcessing={deleteMutation.isPending}
+        variant="danger"
+      />
     </div>
   )
 }

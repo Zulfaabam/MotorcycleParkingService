@@ -68,12 +68,14 @@ export interface ParkingRecordDto {
   exitTime: string | null;
   estimatedFee: number;
   isNeedWashing: boolean;
+  notes?: string;
 }
 
 export interface CreateParkingRecordDto {
   motorcycleLicensePlate: string;
   entryTime: string;
   isNeedWashing: boolean;
+  notes?: string;
 }
 
 export interface UpdateParkingRecordDto {
@@ -82,6 +84,7 @@ export interface UpdateParkingRecordDto {
   exitTime: string | null;
   estimatedFee: number;
   isNeedWashing: boolean;
+  notes?: string;
 }
 
 // --- API Service Methods ---
