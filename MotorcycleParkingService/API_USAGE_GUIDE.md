@@ -6,12 +6,12 @@ This guide provides comprehensive documentation on using the Motorcycle Parking 
 
 ## 📌 API Information
 
-* **Base URL**: 
+- **Base URL**:
   - HTTP: `http://localhost:5000`
   - HTTPS: `https://localhost:5001`
-* **Default Port**: Configure ports in `Properties/launchSettings.json`.
-* **Path Prefix**: `/api/`
-* **Headers**:
+- **Default Port**: Configure ports in `Properties/launchSettings.json`.
+- **Path Prefix**: `/api/`
+- **Headers**:
   - `Content-Type: application/json` (Required for request bodies)
   - `Authorization: Bearer <your_jwt_token>` (Required for all protected endpoints)
 
@@ -20,9 +20,10 @@ This guide provides comprehensive documentation on using the Motorcycle Parking 
 ## 🔐 Default Test Account
 
 Use the seeded administrator account for testing and initial requests:
-* **Email**: `admin@parkir.com`
-* **Password**: `Admin123!`
-* **Role**: `Admin`
+
+- **Email**: `admin@parkir.com`
+- **Password**: `Admin123!`
+- **Role**: `Admin`
 
 ---
 
@@ -44,6 +45,7 @@ The API uses JSON Web Token (JWT) Bearer authentication to secure endpoints.
 All responses from this API follow a standardized envelope format represented by `ApiResponseDto<T>`:
 
 ### Success Response
+
 ```json
 {
   "success": true,
@@ -54,7 +56,9 @@ All responses from this API follow a standardized envelope format represented by
 ```
 
 ### Error Response
+
 Includes a general error message and a collection of specific validation or error details:
+
 ```json
 {
   "success": false,
@@ -73,12 +77,13 @@ Includes a general error message and a collection of specific validation or erro
 
 Inputs are validated using FluentValidation. If a validation check fails, the API responds with a `400 Bad Request` containing details in the `errors` array.
 
-| Field | Rules | Associated DTO |
-| :--- | :--- | :--- |
-| **Login - Email** | Required, must be a valid email format. | `LoginDto` |
-| **Login - Password** | Required. | `LoginDto` |
-| **Parking - License Plate**| Required, cannot be empty. | `CreateParkingRecordDto`, `UpdateParkingRecordDto` |
-| **Parking - Entry Time** | Required, must be in the future (greater than current time). | `CreateParkingRecordDto`, `UpdateParkingRecordDto` |
+| Field                       | Rules                                                        | Associated DTO                                     |
+| :-------------------------- | :----------------------------------------------------------- | :------------------------------------------------- |
+| **Login - Email**           | Required, must be a valid email format.                      | `LoginDto`                                         |
+| **Login - Password**        | Required.                                                    | `LoginDto`                                         |
+| **Parking - License Plate** | Required, cannot be empty.                                   | `CreateParkingRecordDto`, `UpdateParkingRecordDto` |
+| **Parking - Entry Time**    | Required, must be in the future (greater than current time). | `CreateParkingRecordDto`, `UpdateParkingRecordDto` |
+| **Parking - Notes**         | Optional, additional information.                            | `CreateParkingRecordDto`, `UpdateParkingRecordDto` |
 
 ---
 
@@ -87,16 +92,17 @@ Inputs are validated using FluentValidation. If a validation check fails, the AP
 ### 1. Authentication Endpoints
 
 #### `POST /api/Auth/login`
+
 Authenticates a user and generates a JWT.
 
-* **Request Body (`LoginDto`)**:
+- **Request Body (`LoginDto`)**:
   ```json
   {
     "email": "admin@parkir.com",
     "password": "Admin123!"
   }
   ```
-* **Success Response (200 OK - Data is `AuthResponseDto`)**:
+- **Success Response (200 OK - Data is `AuthResponseDto`)**:
   ```json
   {
     "success": true,
@@ -119,10 +125,11 @@ Authenticates a user and generates a JWT.
   ```
 
 #### `GET /api/Auth/me`
-Retrieves information about the currently logged-in user. *(Requires Authentication)*
 
-* **Headers**: `Authorization: Bearer <Token>`
-* **Success Response (200 OK - Data is `UserDto`)**:
+Retrieves information about the currently logged-in user. _(Requires Authentication)_
+
+- **Headers**: `Authorization: Bearer <Token>`
+- **Success Response (200 OK - Data is `UserDto`)**:
   ```json
   {
     "success": true,
@@ -145,10 +152,11 @@ Retrieves information about the currently logged-in user. *(Requires Authenticat
 ### 2. Parking Record Endpoints
 
 #### `GET /api/ParkingRecords`
-Retrieves all parking logs. *(Requires Authentication)*
 
-* **Headers**: `Authorization: Bearer <Token>`
-* **Success Response (200 OK - Data is `List<ParkingRecordDto>`)**:
+Retrieves all parking logs. _(Requires Authentication)_
+
+- **Headers**: `Authorization: Bearer <Token>`
+- **Success Response (200 OK - Data is `List<ParkingRecordDto>`)**:
   ```json
   {
     "success": true,
@@ -160,8 +168,9 @@ Retrieves all parking logs. *(Requires Authentication)*
         "motorcycleBrandName": "Honda",
         "entryTime": "2026-07-08T08:00:00+07:00",
         "exitTime": null,
-        "estimatedFee": 0.00,
-        "isNeedWashing": false
+        "estimatedFee": 0.0,
+        "isNeedWashing": false,
+        "notes": "Will be picked up tonight"
       }
     ],
     "errors": []
@@ -169,10 +178,11 @@ Retrieves all parking logs. *(Requires Authentication)*
   ```
 
 #### `GET /api/ParkingRecords/{id}`
-Retrieves a parking record by its unique ID. *(Requires Authentication)*
 
-* **Headers**: `Authorization: Bearer <Token>`
-* **Success Response (200 OK - Data is `ParkingRecordDto`)**:
+Retrieves a parking record by its unique ID. _(Requires Authentication)_
+
+- **Headers**: `Authorization: Bearer <Token>`
+- **Success Response (200 OK - Data is `ParkingRecordDto`)**:
   ```json
   {
     "success": true,
@@ -183,26 +193,29 @@ Retrieves a parking record by its unique ID. *(Requires Authentication)*
       "motorcycleBrandName": "Honda",
       "entryTime": "2026-07-08T08:00:00+07:00",
       "exitTime": null,
-      "estimatedFee": 0.00,
-      "isNeedWashing": false
+      "estimatedFee": 0.0,
+      "isNeedWashing": false,
+      "notes": "Will be picked up tonight"
     },
     "errors": []
   }
   ```
 
 #### `POST /api/ParkingRecords`
-Creates a new parking record. *(Requires Authentication)*
 
-* **Headers**: `Authorization: Bearer <Token>`
-* **Request Body (`CreateParkingRecordDto`)**:
+Creates a new parking record. _(Requires Authentication)_
+
+- **Headers**: `Authorization: Bearer <Token>`
+- **Request Body (`CreateParkingRecordDto`)**:
   ```json
   {
     "motorcycleLicensePlate": "B 1234 ABC",
     "entryTime": "2026-07-08T08:00:00+07:00",
-    "isNeedWashing": false
+    "isNeedWashing": false,
+    "notes": "Will be picked up tonight"
   }
   ```
-* **Success Response (200 OK - Data is `ParkingRecordDto`)**:
+- **Success Response (200 OK - Data is `ParkingRecordDto`)**:
   ```json
   {
     "success": true,
@@ -213,28 +226,31 @@ Creates a new parking record. *(Requires Authentication)*
       "motorcycleBrandName": null,
       "entryTime": "2026-07-08T08:00:00+07:00",
       "exitTime": null,
-      "estimatedFee": 0.00,
-      "isNeedWashing": false
+      "estimatedFee": 0.0,
+      "isNeedWashing": false,
+      "notes": "Will be picked up tonight"
     },
     "errors": []
   }
   ```
 
 #### `PUT /api/ParkingRecords/{id}`
-Updates details of an existing parking record. *(Requires Authentication)*
 
-* **Headers**: `Authorization: Bearer <Token>`
-* **Request Body (`UpdateParkingRecordDto`)**:
+Updates details of an existing parking record. _(Requires Authentication)_
+
+- **Headers**: `Authorization: Bearer <Token>`
+- **Request Body (`UpdateParkingRecordDto`)**:
   ```json
   {
     "motorcycleLicensePlate": "B 1234 ABC",
     "entryTime": "2026-07-08T08:00:00+07:00",
     "exitTime": "2026-07-08T12:00:00+07:00",
-    "estimatedFee": 10000.00,
-    "isNeedWashing": true
+    "estimatedFee": 10000.0,
+    "isNeedWashing": true,
+    "notes": "Scratch on the left side, washed"
   }
   ```
-* **Success Response (200 OK - Data is `ParkingRecordDto`)**:
+- **Success Response (200 OK - Data is `ParkingRecordDto`)**:
   ```json
   {
     "success": true,
@@ -245,18 +261,20 @@ Updates details of an existing parking record. *(Requires Authentication)*
       "motorcycleBrandName": null,
       "entryTime": "2026-07-08T08:00:00+07:00",
       "exitTime": "2026-07-08T12:00:00+07:00",
-      "estimatedFee": 10000.00,
-      "isNeedWashing": true
+      "estimatedFee": 10000.0,
+      "isNeedWashing": true,
+      "notes": "Scratch on the left side, washed"
     },
     "errors": []
   }
   ```
 
 #### `DELETE /api/ParkingRecords/{id}`
-Deletes a parking record. *(Requires Authentication)*
 
-* **Headers**: `Authorization: Bearer <Token>`
-* **Success Response (200 OK)**:
+Deletes a parking record. _(Requires Authentication)_
+
+- **Headers**: `Authorization: Bearer <Token>`
+- **Success Response (200 OK)**:
   ```json
   {
     "success": true,
@@ -273,15 +291,18 @@ Deletes a parking record. *(Requires Authentication)*
 Ensure you replace `<PORT>` with the actual active port (e.g., `5001`) and run the commands in order.
 
 ### Step 1: Login to Obtain JWT Token
+
 ```bash
 curl -X POST "https://localhost:5001/api/Auth/login" \
      -H "Content-Type: application/json" \
      -d "{\"email\":\"admin@parkir.com\",\"password\":\"Admin123!\"}" \
      -k
 ```
-*Note down the `"token"` value from the response (denoted as `[TOKEN]` below).*
+
+_Note down the `"token"` value from the response (denoted as `[TOKEN]` below)._
 
 ### Step 2: Get Current Logged-in User Info
+
 ```bash
 curl -X GET "https://localhost:5001/api/Auth/me" \
      -H "Authorization: Bearer [TOKEN]" \
@@ -289,16 +310,19 @@ curl -X GET "https://localhost:5001/api/Auth/me" \
 ```
 
 ### Step 3: Create a Parking Record (Check-In)
+
 ```bash
 curl -X POST "https://localhost:5001/api/ParkingRecords" \
      -H "Authorization: Bearer [TOKEN]" \
      -H "Content-Type: application/json" \
-     -d "{\"motorcycleLicensePlate\":\"B 9999 XYZ\",\"entryTime\":\"2026-07-08T10:00:00+07:00\",\"isNeedWashing\":false}" \
+     -d "{\"motorcycleLicensePlate\":\"B 9999 XYZ\",\"entryTime\":\"2026-07-08T10:00:00+07:00\",\"isNeedWashing\":false,\"notes\":\"Helmet on mirror\"}" \
      -k
 ```
-*Note down the created record's `"id"` (denoted as `[RECORD_ID]` below).*
+
+_Note down the created record's `"id"` (denoted as `[RECORD_ID]` below)._
 
 ### Step 4: Get All Parking Records
+
 ```bash
 curl -X GET "https://localhost:5001/api/ParkingRecords" \
      -H "Authorization: Bearer [TOKEN]" \
@@ -306,22 +330,24 @@ curl -X GET "https://localhost:5001/api/ParkingRecords" \
 ```
 
 ### Step 5: Update a Parking Record (Check-Out/Modify)
+
 ```bash
 curl -X PUT "https://localhost:5001/api/ParkingRecords/[RECORD_ID]" \
      -H "Authorization: Bearer [TOKEN]" \
      -H "Content-Type: application/json" \
-     -d "{\"motorcycleLicensePlate\":\"B 9999 XYZ\",\"entryTime\":\"2026-07-08T10:00:00+07:00\",\"exitTime\":\"2026-07-08T14:00:00+07:00\",\"estimatedFee\":8000.00,\"isNeedWashing\":true}" \
+     -d "{\"motorcycleLicensePlate\":\"B 9999 XYZ\",\"entryTime\":\"2026-07-08T10:00:00+07:00\",\"exitTime\":\"2026-07-08T14:00:00+07:00\",\"estimatedFee\":8000.00,\"isNeedWashing\":true,\"notes\":\"Helmet on mirror, washed\"}" \
      -k
 ```
 
 ### Step 6: Delete a Parking Record
+
 ```bash
 curl -X DELETE "https://localhost:5001/api/ParkingRecords/[RECORD_ID]" \
      -H "Authorization: Bearer [TOKEN]" \
      -k
 ```
 
-*(Note: The `-k` flag is added to ignore SSL certificate validation on localhost/self-signed configurations).*
+_(Note: The `-k` flag is added to ignore SSL certificate validation on localhost/self-signed configurations)._
 
 ---
 

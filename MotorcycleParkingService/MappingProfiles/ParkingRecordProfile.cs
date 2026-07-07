@@ -7,5 +7,7 @@ public class ParkingRecordProfile : Profile
         CreateMap<ParkingRecord, ParkingRecordDto>()
             .ForMember(dest => dest.MotorcycleLicensePlate, opt => opt.MapFrom(src => src.Motorcycle.LicensePlate))
             .ForMember(dest => dest.MotorcycleBrandName, opt => opt.MapFrom(src => src.Motorcycle.Brand.Name));
+
+        CreateMap<UpdateParkingRecordDto, ParkingRecord>();
     }
 }

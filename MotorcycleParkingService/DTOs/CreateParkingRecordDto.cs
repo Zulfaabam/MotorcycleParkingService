@@ -5,4 +5,6 @@ public class CreateParkingRecordDto
     public DateTimeOffset EntryTime { get; set; }
 
     public bool IsNeedWashing { get; set; }
+
+    public string? Notes { get; set; }
 }

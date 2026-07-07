@@ -18,4 +18,6 @@ public class ParkingRecord
     public decimal EstimatedFee { get; set; }
 
     public bool IsNeedWashing { get; set; }
+
+    public string? Notes { get; set; }
 }
