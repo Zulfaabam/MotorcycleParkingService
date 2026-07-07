@@ -1,6 +1,8 @@
 public class UpdateParkingRecordDto
 {
-    public string LicensePlate { get; set; } = string.Empty;
+    public string MotorcycleLicensePlate { get; set; } = string.Empty;
+
+    public DateTimeOffset EntryTime { get; set; }
 
     public DateTimeOffset ExitTime { get; set; }
 

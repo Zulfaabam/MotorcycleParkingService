@@ -13,7 +13,7 @@ public class ParkingRecordRepository : IParkingRecordRepository
     {
         return await _context.ParkingRecords
             .Include(p => p.Motorcycle)
-            .OrderByDescending(p => p.EntryTime)
+            // .OrderByDescending(p => p.EntryTime)
             .ToListAsync();
     }
 
