@@ -1,8 +1,10 @@
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class ParkingRecordsController : ControllerBase
 {
     private readonly IParkingRecordService _parkingRecordService;
