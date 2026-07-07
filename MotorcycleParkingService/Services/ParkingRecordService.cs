@@ -1,14 +1,15 @@
 using AutoMapper;
-using SQLitePCL;
 
 public class ParkingRecordService : IParkingRecordService
 {
     private readonly IParkingRecordRepository _repository;
+    private readonly IMotorcycleRepository _motorcycleRepository;
     private readonly IMapper _mapper;
 
-    public ParkingRecordService(IParkingRecordRepository repository, IMapper mapper)
+    public ParkingRecordService(IParkingRecordRepository repository, IMotorcycleRepository motorcycleRepository, IMapper mapper)
     {
         _repository = repository;
+        _motorcycleRepository = motorcycleRepository;
         _mapper = mapper;
     }
 
@@ -52,7 +53,27 @@ public class ParkingRecordService : IParkingRecordService
     {
         try
         {
-            var parkingRecord = _mapper.Map<ParkingRecord>(createDto);
+            // Look up or auto-create the motorcycle by license plate
+            var normalizedPlate = createDto.MotorcycleLicensePlate.Trim().ToUpper();
+            var motorcycle = await _motorcycleRepository.GetByLicensePlateAsync(normalizedPlate);
+
+            if (motorcycle == null)
+            {
+                motorcycle = new Motorcycle
+                {
+                    Id = Guid.NewGuid(),
+                    LicensePlate = normalizedPlate
+                };
+                await _motorcycleRepository.CreateAsync(motorcycle);
+            }
+
+            var parkingRecord = new ParkingRecord
+            {
+                Id = Guid.NewGuid(),
+                MotorcycleId = motorcycle.Id,
+                EntryTime = DateTimeOffset.Now,
+                IsNeedWashing = createDto.IsNeedWashing
+            };
 
             var createdParkingRecord = await _repository.CreateAsync(parkingRecord);
             var parkingRecordDto = _mapper.Map<ParkingRecordDto>(createdParkingRecord);

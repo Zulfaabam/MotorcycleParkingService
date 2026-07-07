@@ -113,6 +113,7 @@ builder.Services.AddScoped<IValidator<LoginDto>, LoginValidator>();
 
 // Add Repositories
 builder.Services.AddScoped<IParkingRecordRepository, ParkingRecordRepository>();
+builder.Services.AddScoped<IMotorcycleRepository, MotorcycleRepository>();
 
 // Add Services
 builder.Services.AddScoped<IParkingRecordService, ParkingRecordService>();
