@@ -54,7 +54,7 @@ public class ParkingRecordRepository : IParkingRecordRepository
 
   public async Task DeleteAsync(Guid id)
   {
-    var parkingRecord = await _context.ParkingRecords
+    ParkingRecord? parkingRecord = await _context.ParkingRecords
             .FirstOrDefaultAsync(t => t.Id == id);
 
     if( parkingRecord != null )

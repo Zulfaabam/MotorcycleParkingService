@@ -1,4 +1,5 @@
 using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,9 +26,9 @@ public class ParkingRecordsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var result = await _parkingRecordService.GetAllAsync();
+        ApiResponseDto<List<ParkingRecordDto>> result = await _parkingRecordService.GetAllAsync();
 
-        if (!result.Success)
+        if( !result.Success )
         {
             return BadRequest(result);
         }
@@ -38,9 +39,9 @@ public class ParkingRecordsController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
-        var result = await _parkingRecordService.GetByIdAsync(id);
+        ApiResponseDto<ParkingRecordDto> result = await _parkingRecordService.GetByIdAsync(id);
 
-        if (!result.Success)
+        if( !result.Success )
         {
             return BadRequest(result);
         }
@@ -51,18 +52,18 @@ public class ParkingRecordsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateParkingRecordDto createDto)
     {
-        var validationResult = await _createValidator.ValidateAsync(createDto);
+        ValidationResult validationResult = await _createValidator.ValidateAsync(createDto);
 
-        if (!validationResult.IsValid)
+        if( !validationResult.IsValid )
         {
-            var errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList();
+            List<string>? errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList();
             var errorResponse = ApiResponseDto<CreateParkingRecordDto>.ErrorResult("Validation failed", errors);
             return BadRequest(errorResponse);
         }
 
-        var result = await _parkingRecordService.CreateAsync(createDto);
+        ApiResponseDto<ParkingRecordDto> result = await _parkingRecordService.CreateAsync(createDto);
 
-        if (!result.Success)
+        if( !result.Success )
         {
             return BadRequest(result);
         }
@@ -73,18 +74,18 @@ public class ParkingRecordsController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateParkingRecordDto updateDto)
     {
-        var validationResult = await _updateValidator.ValidateAsync(updateDto);
+        ValidationResult validationResult = await _updateValidator.ValidateAsync(updateDto);
 
-        if (!validationResult.IsValid)
+        if( !validationResult.IsValid )
         {
-            var errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList();
+            List<string>? errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList();
             var errorResponse = ApiResponseDto<UpdateParkingRecordDto>.ErrorResult("Validation failed", errors);
             return BadRequest(errorResponse);
         }
 
-        var result = await _parkingRecordService.UpdateAsync(id, updateDto);
+        ApiResponseDto<ParkingRecordDto> result = await _parkingRecordService.UpdateAsync(id, updateDto);
 
-        if (!result.Success)
+        if( !result.Success )
         {
             return BadRequest(result);
         }
@@ -95,9 +96,9 @@ public class ParkingRecordsController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        var result = await _parkingRecordService.DeleteAsync(id);
+        ApiResponseDto<bool> result = await _parkingRecordService.DeleteAsync(id);
 
-        if (!result.Success)
+        if( !result.Success )
         {
             return BadRequest(result);
         }

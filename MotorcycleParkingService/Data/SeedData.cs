@@ -4,8 +4,8 @@ public static class SeedData
 {
   public static async Task Initialize(IServiceProvider serviceProvider)
   {
-    var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+    RoleManager<IdentityRole> roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    UserManager<ApplicationUser> userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
     // Create roles
     string[] roleNames = { "Admin", "User" };
@@ -19,8 +19,8 @@ public static class SeedData
     }
 
     // Create admin user
-    var adminEmail = "admin@parkir.com";
-    var adminUser = await userManager.FindByEmailAsync(adminEmail);
+    string adminEmail = "admin@parkir.com";
+    ApplicationUser? adminUser = await userManager.FindByEmailAsync(adminEmail);
 
     if( adminUser == null )
     {
@@ -34,7 +34,7 @@ public static class SeedData
         CreatedAt = DateTime.UtcNow
       };
 
-      var result = await userManager.CreateAsync(adminUser, "Admin123!");
+      IdentityResult result = await userManager.CreateAsync(adminUser, "Admin123!");
 
       if( result.Succeeded )
       {
@@ -46,7 +46,7 @@ public static class SeedData
 
     // Create sample user
     var userEmail = "user@parkir.com";
-    var sampleUser = await userManager.FindByEmailAsync(userEmail);
+    ApplicationUser? sampleUser = await userManager.FindByEmailAsync(userEmail);
 
     if( sampleUser == null )
     {
@@ -60,7 +60,7 @@ public static class SeedData
         CreatedAt = DateTime.UtcNow
       };
 
-      var result = await userManager.CreateAsync(sampleUser, "User123!");
+      IdentityResult result = await userManager.CreateAsync(sampleUser, "User123!");
 
       if( result.Succeeded )
       {

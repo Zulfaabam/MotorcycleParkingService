@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,15 +25,15 @@ public class AuthController : ControllerBase
   [HttpPost("register")]
   public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
   {
-    var validationResult = await _registerValidator.ValidateAsync(registerDto);
+    ValidationResult validationResult = await _registerValidator.ValidateAsync(registerDto);
     if( !validationResult.IsValid )
     {
-      var errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList();
+      List<string>? errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList();
       var errorResponse = ApiResponseDto<AuthResponseDto>.ErrorResult("Validation failed", errors);
       return BadRequest(errorResponse);
     }
 
-    var result = await _authService.RegisterAsync(registerDto);
+    ApiResponseDto<AuthResponseDto> result = await _authService.RegisterAsync(registerDto);
 
     if( !result.Success )
     {
@@ -45,15 +46,15 @@ public class AuthController : ControllerBase
   [HttpPost("login")]
   public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
   {
-    var validationResult = await _loginValidator.ValidateAsync(loginDto);
+    ValidationResult validationResult = await _loginValidator.ValidateAsync(loginDto);
     if( !validationResult.IsValid )
     {
-      var errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList();
+      List<string>? errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList();
       var errorResponse = ApiResponseDto<AuthResponseDto>.ErrorResult("Validation failed", errors);
       return BadRequest(errorResponse);
     }
 
-    var result = await _authService.LoginAsync(loginDto);
+    ApiResponseDto<AuthResponseDto> result = await _authService.LoginAsync(loginDto);
 
     if( !result.Success )
     {
@@ -67,14 +68,14 @@ public class AuthController : ControllerBase
   [Authorize]
   public async Task<IActionResult> GetCurrentUser()
   {
-    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
     if( string.IsNullOrEmpty(userId) )
     {
       return Unauthorized();
     }
 
-    var result = await _authService.GetCurrentUserAsync(userId);
+    ApiResponseDto<UserDto> result = await _authService.GetCurrentUserAsync(userId);
 
     if( !result.Success )
     {
