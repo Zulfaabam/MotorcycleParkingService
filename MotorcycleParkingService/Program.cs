@@ -118,6 +118,7 @@ builder.Services.AddScoped<IMotorcycleRepository, MotorcycleRepository>();
 // Add Services
 builder.Services.AddScoped<IParkingRecordService, ParkingRecordService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IParkingFeeCalculator, ParkingFeeCalculator>();
 
 // Add controllers
 builder.Services.AddControllers();

@@ -4,13 +4,20 @@ public class ParkingRecordService : IParkingRecordService
 {
     private readonly IParkingRecordRepository _repository;
     private readonly IMotorcycleRepository _motorcycleRepository;
+    private readonly IParkingFeeCalculator _feeCalculator;
     private readonly IMapper _mapper;
 
-    public ParkingRecordService(IParkingRecordRepository repository, IMotorcycleRepository motorcycleRepository, IMapper mapper)
+
+    public ParkingRecordService(
+        IParkingRecordRepository repository, 
+        IMotorcycleRepository motorcycleRepository, 
+        IMapper mapper, 
+        IParkingFeeCalculator feeCalculator)
     {
         _repository = repository;
         _motorcycleRepository = motorcycleRepository;
         _mapper = mapper;
+        _feeCalculator = feeCalculator;
     }
 
     public async Task<ApiResponseDto<List<ParkingRecordDto>>> GetAllAsync()
@@ -72,7 +79,9 @@ public class ParkingRecordService : IParkingRecordService
                 Id = Guid.NewGuid(),
                 MotorcycleId = motorcycle.Id,
                 EntryTime = DateTimeOffset.Now,
-                IsNeedWashing = createDto.IsNeedWashing
+                IsNeedWashing = createDto.IsNeedWashing,
+                EstimatedFee = _feeCalculator.CalculateFee(DateTimeOffset.Now, DateTimeOffset.Now, createDto.IsNeedWashing),
+                Notes = createDto.Notes
             };
 
             var createdParkingRecord = await _repository.CreateAsync(parkingRecord);
@@ -98,6 +107,13 @@ public class ParkingRecordService : IParkingRecordService
             }
 
             _mapper.Map(updateDto, existingParkingRecord);
+
+            var timeToCalculateAgainst = existingParkingRecord.ExitTime ?? DateTimeOffset.Now;
+            
+            existingParkingRecord.EstimatedFee = _feeCalculator.CalculateFee(
+                existingParkingRecord.EntryTime, 
+                timeToCalculateAgainst, 
+                existingParkingRecord.IsNeedWashing);
 
             var updatedParkingRecord = await _repository.UpdateAsync(existingParkingRecord);
             var parkingRecordDto = _mapper.Map<ParkingRecordDto>(updatedParkingRecord);

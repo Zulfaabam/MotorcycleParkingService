@@ -2,12 +2,20 @@ import React, { useState, useEffect } from 'react'
 import { Bike, X } from 'lucide-react'
 
 interface CheckInModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (data: { licensePlate: string; isNeedWashing: boolean; notes: string }) => void;
-  isSubmitting: boolean;
-  mode?: 'add' | 'edit';
-  initialData?: { licensePlate: string; isNeedWashing: boolean; notes: string } | null;
+  isOpen: boolean
+  onClose: () => void
+  onSubmit: (data: {
+    licensePlate: string
+    isNeedWashing: boolean
+    notes: string
+  }) => void
+  isSubmitting: boolean
+  mode?: 'add' | 'edit'
+  initialData?: {
+    licensePlate: string
+    isNeedWashing: boolean
+    notes: string
+  } | null
 }
 
 export const CheckInModal: React.FC<CheckInModalProps> = ({
@@ -103,7 +111,7 @@ export const CheckInModal: React.FC<CheckInModalProps> = ({
               htmlFor='wash'
               className='text-sm text-foreground font-medium cursor-pointer select-none'
             >
-              Request Motorcycle Wash (+Rp 10.000)
+              Request Motorcycle Wash (+Rp 15.000)
             </label>
           </div>
 
