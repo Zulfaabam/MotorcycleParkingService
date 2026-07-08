@@ -23,6 +23,10 @@ Motorcycle Parking Service is a full-stack web application for managing motorcyc
 
 ![Add parking record](screenshots/add-parking-record.png)
 
+### APIs
+
+![APIs](screenshots/apis.png)
+
 ## Project Structure
 
 - Backend: [MotorcycleParkingService](MotorcycleParkingService)
