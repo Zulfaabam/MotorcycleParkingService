@@ -24,49 +24,49 @@ public class AuthService : IAuthService
     _mapper = mapper;
   }
 
-  // public async Task<ApiResponseDto<AuthResponseDto>> RegisterAsync(RegisterDto registerDto)
-  // {
-  //     try
-  //     {
-  //         var existingUser = await _userManager.FindByEmailAsync(registerDto.Email);
-  //         if (existingUser != null)
-  //         {
-  //             return ApiResponseDto<AuthResponseDto>.ErrorResult("User with this email already exists");
-  //         }
+  public async Task<ApiResponseDto<AuthResponseDto>> RegisterAsync(RegisterDto registerDto)
+  {
+    try
+    {
+      var existingUser = await _userManager.FindByEmailAsync(registerDto.Email);
+      if( existingUser != null )
+      {
+        return ApiResponseDto<AuthResponseDto>.ErrorResult("User with this email already exists");
+      }
 
-  //         var user = _mapper.Map<ApplicationUser>(registerDto);
-  //         var result = await _userManager.CreateAsync(user, registerDto.Password);
+      var user = _mapper.Map<ApplicationUser>(registerDto);
+      var result = await _userManager.CreateAsync(user, registerDto.Password);
 
-  //         if (!result.Succeeded)
-  //         {
-  //             var errors = result.Errors.Select(e => e.Description).ToList();
-  //             return ApiResponseDto<AuthResponseDto>.ErrorResult("Registration failed", errors);
-  //         }
+      if( !result.Succeeded )
+      {
+        var errors = result.Errors.Select(e => e.Description).ToList();
+        return ApiResponseDto<AuthResponseDto>.ErrorResult("Registration failed", errors);
+      }
 
-  //         // Add user to default role
-  //         await _userManager.AddToRoleAsync(user, "User");
+      // Add user to default role
+      await _userManager.AddToRoleAsync(user, "User");
 
-  //         var authResponse = await GenerateJwtToken(user);
-  //         return ApiResponseDto<AuthResponseDto>.SuccessResult(authResponse, "Registration successful");
-  //     }
-  //     catch (Exception ex)
-  //     {
-  //         return ApiResponseDto<AuthResponseDto>.ErrorResult($"Registration error: {ex.Message}");
-  //     }
-  // }
+      var authResponse = await GenerateJwtToken(user);
+      return ApiResponseDto<AuthResponseDto>.SuccessResult(authResponse, "Registration successful");
+    }
+    catch( Exception ex )
+    {
+      return ApiResponseDto<AuthResponseDto>.ErrorResult($"Registration error: {ex.Message}");
+    }
+  }
 
   public async Task<ApiResponseDto<AuthResponseDto>> LoginAsync(LoginDto loginDto)
   {
     try
     {
       var user = await _userManager.FindByEmailAsync(loginDto.Email);
-      if (user == null)
+      if( user == null )
       {
         return ApiResponseDto<AuthResponseDto>.ErrorResult("Invalid email or password");
       }
 
       var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
-      if (!result.Succeeded)
+      if( !result.Succeeded )
       {
         return ApiResponseDto<AuthResponseDto>.ErrorResult("Invalid email or password");
       }
@@ -74,7 +74,7 @@ public class AuthService : IAuthService
       var authResponse = await GenerateJwtToken(user);
       return ApiResponseDto<AuthResponseDto>.SuccessResult(authResponse, "Login successful");
     }
-    catch (Exception ex)
+    catch( Exception ex )
     {
       return ApiResponseDto<AuthResponseDto>.ErrorResult($"Login error: {ex.Message}");
     }
@@ -85,7 +85,7 @@ public class AuthService : IAuthService
     try
     {
       var user = await _userManager.FindByIdAsync(userId);
-      if (user == null)
+      if( user == null )
       {
         return ApiResponseDto<UserDto>.ErrorResult("User not found");
       }
@@ -96,7 +96,7 @@ public class AuthService : IAuthService
 
       return ApiResponseDto<UserDto>.SuccessResult(userDto);
     }
-    catch (Exception ex)
+    catch( Exception ex )
     {
       return ApiResponseDto<UserDto>.ErrorResult($"Error retrieving user: {ex.Message}");
     }
@@ -118,7 +118,7 @@ public class AuthService : IAuthService
           new Claim("LastName", user.LastName ?? "")
       };
 
-    foreach (var role in roles)
+    foreach( var role in roles )
     {
       claims.Add(new Claim(ClaimTypes.Role, role));
     }

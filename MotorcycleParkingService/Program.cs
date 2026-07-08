@@ -15,16 +15,16 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite
 // Add Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
-    // Password settings
-    options.Password.RequireDigit = true;
-    options.Password.RequiredLength = 6;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequireUppercase = true;
-    options.Password.RequireLowercase = true;
+  // Password settings
+  options.Password.RequireDigit = true;
+  options.Password.RequiredLength = 6;
+  options.Password.RequireNonAlphanumeric = false;
+  options.Password.RequireUppercase = true;
+  options.Password.RequireLowercase = true;
 
-    // User settings
-    options.User.RequireUniqueEmail = true;
-    options.SignIn.RequireConfirmedEmail = false;
+  // User settings
+  options.User.RequireUniqueEmail = true;
+  options.SignIn.RequireConfirmedEmail = false;
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
@@ -35,22 +35,22 @@ var key = Encoding.ASCII.GetBytes(jwtSettings["Secret"] ?? "your-super-secret-ke
 
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+  options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+  options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
 .AddJwtBearer(options =>
 {
-    options.RequireHttpsMetadata = false;
-    options.SaveToken = true;
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(key),
-        ValidateIssuer = false,
-        ValidateAudience = false,
-        ValidateLifetime = true,
-        ClockSkew = TimeSpan.Zero
-    };
+  options.RequireHttpsMetadata = false;
+  options.SaveToken = true;
+  options.TokenValidationParameters = new TokenValidationParameters
+  {
+    ValidateIssuerSigningKey = true,
+    IssuerSigningKey = new SymmetricSecurityKey(key),
+    ValidateIssuer = false,
+    ValidateAudience = false,
+    ValidateLifetime = true,
+    ClockSkew = TimeSpan.Zero
+  };
 });
 
 // Add services to the container.
@@ -58,24 +58,24 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "AbamsParking API",
-        Version = "v1",
-        Description = "A comprehensive AbamsParking Management API with authentication and CRUD operations"
-    });
+  c.SwaggerDoc("v1", new OpenApiInfo
+  {
+    Title = "AbamsParking API",
+    Version = "v1",
+    Description = "A comprehensive AbamsParking Management API with authentication and CRUD operations"
+  });
 
-    // Add JWT Authentication to Swagger
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token in the text input below.",
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
-    });
+  // Add JWT Authentication to Swagger
+  c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+  {
+    Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token in the text input below.",
+    Name = "Authorization",
+    In = ParameterLocation.Header,
+    Type = SecuritySchemeType.ApiKey,
+    Scheme = "Bearer"
+  });
 
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+  c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
             new OpenApiSecurityScheme
@@ -93,13 +93,13 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 
-    // Include XML comments
-    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-    if (File.Exists(xmlPath))
-    {
-        c.IncludeXmlComments(xmlPath);
-    }
+  // Include XML comments
+  var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+  var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+  if( File.Exists(xmlPath) )
+  {
+    c.IncludeXmlComments(xmlPath);
+  }
 });
 
 // Add AutoMapper
@@ -108,7 +108,7 @@ builder.Services.AddAutoMapper(typeof(Program));
 // Add FluentValidation
 builder.Services.AddScoped<IValidator<CreateParkingRecordDto>, CreateParkingRecordValidator>();
 builder.Services.AddScoped<IValidator<UpdateParkingRecordDto>, UpdateParkingRecordValidator>();
-// builder.Services.AddScoped<IValidator<RegisterDto>, RegisterValidator>();
+builder.Services.AddScoped<IValidator<RegisterDto>, RegisterValidator>();
 builder.Services.AddScoped<IValidator<LoginDto>, LoginValidator>();
 
 // Add Repositories
@@ -126,28 +126,28 @@ builder.Services.AddControllers();
 // Add CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", builder =>
-    {
-        builder.AllowAnyOrigin()
-            .AllowAnyMethod()
-            .AllowAnyHeader();
-    });
+  options.AddPolicy("AllowAll", builder =>
+  {
+    builder.AllowAnyOrigin()
+          .AllowAnyMethod()
+          .AllowAnyHeader();
+  });
 });
 
 var app = builder.Build();
 
 // Seed roles and admin user
-using (var scope = app.Services.CreateScope())
+using( var scope = app.Services.CreateScope() )
 {
-    var services = scope.ServiceProvider;
-    await SeedData.Initialize(services);
+  var services = scope.ServiceProvider;
+  await SeedData.Initialize(services);
 }
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if( app.Environment.IsDevelopment() )
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+  app.UseSwagger();
+  app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();

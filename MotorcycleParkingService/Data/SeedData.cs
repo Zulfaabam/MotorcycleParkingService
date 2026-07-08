@@ -8,11 +8,11 @@ public static class SeedData
     var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
     // Create roles
-    string[] roleNames = { "Admin" };
+    string[] roleNames = { "Admin", "User" };
 
-    foreach (var roleName in roleNames)
+    foreach( var roleName in roleNames )
     {
-      if (!await roleManager.RoleExistsAsync(roleName))
+      if( !await roleManager.RoleExistsAsync(roleName) )
       {
         await roleManager.CreateAsync(new IdentityRole(roleName));
       }
@@ -22,7 +22,7 @@ public static class SeedData
     var adminEmail = "admin@parkir.com";
     var adminUser = await userManager.FindByEmailAsync(adminEmail);
 
-    if (adminUser == null)
+    if( adminUser == null )
     {
       adminUser = new ApplicationUser
       {
@@ -36,12 +36,38 @@ public static class SeedData
 
       var result = await userManager.CreateAsync(adminUser, "Admin123!");
 
-      if (result.Succeeded)
+      if( result.Succeeded )
       {
         await userManager.AddToRoleAsync(adminUser, "Admin");
         Console.WriteLine($"Admin user created successfully with email: {adminEmail}");
         Console.WriteLine("Default password: Admin123!");
       }
     }
+
+    // Create sample user
+    // var userEmail = "user@todoapi.com";
+    // var sampleUser = await userManager.FindByEmailAsync(userEmail);
+
+    // if( sampleUser == null )
+    // {
+    //   sampleUser = new ApplicationUser
+    //   {
+    //     UserName = userEmail,
+    //     Email = userEmail,
+    //     FirstName = "API",
+    //     LastName = "User",
+    //     EmailConfirmed = true,
+    //     CreatedAt = DateTime.UtcNow
+    //   };
+
+    //   var result = await userManager.CreateAsync(sampleUser, "User123!");
+
+    //   if( result.Succeeded )
+    //   {
+    //     await userManager.AddToRoleAsync(sampleUser, "User");
+    //     Console.WriteLine($"Sample user created successfully with email: {userEmail}");
+    //     Console.WriteLine("Default password: User123!");
+    //   }
+    // }
   }
 }

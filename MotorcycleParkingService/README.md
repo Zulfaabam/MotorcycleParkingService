@@ -63,6 +63,7 @@ Upon initial startup, the database is automatically seeded with a default Admini
 ## 📡 API Endpoints
 
 ### Auth Controller (`/api/Auth`)
+- **`POST /api/Auth/register`**: Register a new user account.
 - **`POST /api/Auth/login`**: Authenticate a user and receive a JWT access token.
 - **`GET /api/Auth/me`**: *(Authorized)* Retrieve details of the currently authenticated user.
 

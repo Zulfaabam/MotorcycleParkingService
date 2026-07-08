@@ -81,6 +81,11 @@ Inputs are validated using FluentValidation. If a validation check fails, the AP
 | :-------------------------- | :----------------------------------------------------------- | :------------------------------------------------- |
 | **Login - Email**           | Required, must be a valid email format.                      | `LoginDto`                                         |
 | **Login - Password**        | Required.                                                    | `LoginDto`                                         |
+| **Register - Email**        | Required, must be a valid email format.                      | `RegisterDto`                                      |
+| **Register - Password**     | Required, min 6 chars, needs uppercase, lowercase, and digit.| `RegisterDto`                                      |
+| **Register - Confirm Pwd**  | Required, must match password.                               | `RegisterDto`                                      |
+| **Register - First Name**   | Optional, max 100 characters.                                | `RegisterDto`                                      |
+| **Register - Last Name**    | Optional, max 100 characters.                                | `RegisterDto`                                      |
 | **Parking - License Plate** | Required, cannot be empty.                                   | `CreateParkingRecordDto`, `UpdateParkingRecordDto` |
 | **Parking - Entry Time**    | Required, must be in the future (greater than current time). | `CreateParkingRecordDto`, `UpdateParkingRecordDto` |
 | **Parking - Notes**         | Optional, additional information.                            | `CreateParkingRecordDto`, `UpdateParkingRecordDto` |
@@ -90,6 +95,30 @@ Inputs are validated using FluentValidation. If a validation check fails, the AP
 ## 📡 API Endpoints
 
 ### 1. Authentication Endpoints
+
+#### `POST /api/Auth/register`
+
+Registers a new user account.
+
+- **Request Body (`RegisterDto`)**:
+  ```json
+  {
+    "email": "newuser@parkir.com",
+    "password": "Password123!",
+    "confirmPassword": "Password123!",
+    "firstName": "John",
+    "lastName": "Doe"
+  }
+  ```
+- **Success Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "message": "User registered successfully",
+    "data": null,
+    "errors": []
+  }
+  ```
 
 #### `POST /api/Auth/login`
 
@@ -288,6 +317,15 @@ Deletes a parking record. _(Requires Authentication)_
 ## 💻 Example Workflow in cURL
 
 Ensure you replace `<PORT>` with the actual active port (e.g., `5001`) and run the commands in order.
+
+### Step 0: Register a New User (Optional)
+
+```bash
+curl -X POST "https://localhost:5001/api/Auth/register" \
+     -H "Content-Type: application/json" \
+     -d "{\"email\":\"newuser@parkir.com\",\"password\":\"Password123!\",\"confirmPassword\":\"Password123!\",\"firstName\":\"John\",\"lastName\":\"Doe\"}" \
+     -k
+```
 
 ### Step 1: Login to Obtain JWT Token
 
