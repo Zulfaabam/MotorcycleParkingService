@@ -2,159 +2,159 @@ using AutoMapper;
 
 public class ParkingRecordService : IParkingRecordService
 {
-    private readonly IParkingRecordRepository _repository;
-    private readonly IMotorcycleRepository _motorcycleRepository;
-    private readonly IParkingFeeCalculator _feeCalculator;
-    private readonly IMapper _mapper;
+  private readonly IParkingRecordRepository _repository;
+  private readonly IMotorcycleRepository _motorcycleRepository;
+  private readonly IParkingFeeCalculator _feeCalculator;
+  private readonly IMapper _mapper;
 
-    public ParkingRecordService(
-        IParkingRecordRepository repository,
-        IMotorcycleRepository motorcycleRepository,
-        IMapper mapper,
-        IParkingFeeCalculator feeCalculator)
+  public ParkingRecordService(
+      IParkingRecordRepository repository,
+      IMotorcycleRepository motorcycleRepository,
+      IMapper mapper,
+      IParkingFeeCalculator feeCalculator)
+  {
+    _repository = repository;
+    _motorcycleRepository = motorcycleRepository;
+    _mapper = mapper;
+    _feeCalculator = feeCalculator;
+  }
+
+  public async Task<ApiResponseDto<List<ParkingRecordDto>>> GetAllAsync()
+  {
+    try
     {
-        _repository = repository;
-        _motorcycleRepository = motorcycleRepository;
-        _mapper = mapper;
-        _feeCalculator = feeCalculator;
-    }
+      var parkingRecords = await _repository.GetAllAsync();
+      var parkingRecordDtos = _mapper.Map<List<ParkingRecordDto>>(parkingRecords);
 
-    public async Task<ApiResponseDto<List<ParkingRecordDto>>> GetAllAsync()
+      return ApiResponseDto<List<ParkingRecordDto>>.SuccessResult(parkingRecordDtos, "Successfully retrieved parking record list");
+    }
+    catch( Exception ex )
     {
-        try
-        {
-            var parkingRecords = await _repository.GetAllAsync();
-            var parkingRecordDtos = _mapper.Map<List<ParkingRecordDto>>(parkingRecords);
-
-            return ApiResponseDto<List<ParkingRecordDto>>.SuccessResult(parkingRecordDtos, "Successfully retrieved parking record list");
-        }
-        catch (Exception ex)
-        {
-            return ApiResponseDto<List<ParkingRecordDto>>.ErrorResult($"Error retrieving parking list: {ex.Message}");
-        }
+      return ApiResponseDto<List<ParkingRecordDto>>.ErrorResult($"Error retrieving parking record list: {ex.Message}");
     }
+  }
 
-    public async Task<ApiResponseDto<ParkingRecordDto>> GetByIdAsync(Guid id)
+  public async Task<ApiResponseDto<ParkingRecordDto>> GetByIdAsync(Guid id)
+  {
+    try
     {
-        try
-        {
-            var parkingRecord = await _repository.GetByIdAsync(id);
+      var parkingRecord = await _repository.GetByIdAsync(id);
 
-            if (parkingRecord == null)
-            {
-                return ApiResponseDto<ParkingRecordDto>.ErrorResult($"Parking details not found");
-            }
+      if( parkingRecord == null )
+      {
+        return ApiResponseDto<ParkingRecordDto>.ErrorResult($"Parking record details not found");
+      }
 
-            var parkingRecordDto = _mapper.Map<ParkingRecordDto>(parkingRecord);
+      var parkingRecordDto = _mapper.Map<ParkingRecordDto>(parkingRecord);
 
-            return ApiResponseDto<ParkingRecordDto>.SuccessResult(parkingRecordDto, "Successfully retrieved parking record");
-        }
-        catch (Exception ex)
-        {
-            return ApiResponseDto<ParkingRecordDto>.ErrorResult($"Could not get parking details: {ex.Message}");
-        }
+      return ApiResponseDto<ParkingRecordDto>.SuccessResult(parkingRecordDto, "Successfully retrieved parking record");
     }
-
-    public async Task<ApiResponseDto<ParkingRecordDto>> CreateAsync(CreateParkingRecordDto createDto)
+    catch( Exception ex )
     {
-        try
-        {
-            var normalizedPlate = createDto.MotorcycleLicensePlate.Trim().ToUpper();
-            var motorcycle = await _motorcycleRepository.GetByLicensePlateAsync(normalizedPlate);
-
-            if (motorcycle == null)
-            {
-                motorcycle = new Motorcycle
-                {
-                    Id = Guid.NewGuid(),
-                    LicensePlate = normalizedPlate
-                };
-                await _motorcycleRepository.CreateAsync(motorcycle);
-            }
-
-            var parkingRecord = new ParkingRecord
-            {
-                Id = Guid.NewGuid(),
-                MotorcycleId = motorcycle.Id,
-                EntryTime = DateTimeOffset.Now,
-                IsNeedWashing = createDto.IsNeedWashing,
-                EstimatedFee = _feeCalculator.CalculateFee(DateTimeOffset.Now, DateTimeOffset.Now, createDto.IsNeedWashing),
-                Notes = createDto.Notes
-            };
-
-            var createdParkingRecord = await _repository.CreateAsync(parkingRecord);
-            var parkingRecordDto = _mapper.Map<ParkingRecordDto>(createdParkingRecord);
-
-            return ApiResponseDto<ParkingRecordDto>.SuccessResult(parkingRecordDto, "Successfully added parking record");
-        }
-        catch (Exception ex)
-        {
-            return ApiResponseDto<ParkingRecordDto>.ErrorResult($"Could not create parking record: {ex.Message}");
-        }
+      return ApiResponseDto<ParkingRecordDto>.ErrorResult($"Could not get parking record details: {ex.Message}");
     }
+  }
 
-    public async Task<ApiResponseDto<ParkingRecordDto>> UpdateAsync(Guid id, UpdateParkingRecordDto updateDto)
+  public async Task<ApiResponseDto<ParkingRecordDto>> CreateAsync(CreateParkingRecordDto createDto)
+  {
+    try
     {
-        try
+      var normalizedPlate = createDto.MotorcycleLicensePlate.Trim().ToUpper();
+      var motorcycle = await _motorcycleRepository.GetByLicensePlateAsync(normalizedPlate);
+
+      if( motorcycle == null )
+      {
+        motorcycle = new Motorcycle
         {
-            var existingParkingRecord = await _repository.GetByIdAsync(id);
+          Id = Guid.NewGuid(),
+          LicensePlate = normalizedPlate
+        };
+        await _motorcycleRepository.CreateAsync(motorcycle);
+      }
 
-            if (existingParkingRecord == null)
-            {
-                return ApiResponseDto<ParkingRecordDto>.ErrorResult("Parking record not found");
-            }
+      var parkingRecord = new ParkingRecord
+      {
+        Id = Guid.NewGuid(),
+        MotorcycleId = motorcycle.Id,
+        EntryTime = DateTimeOffset.Now,
+        IsNeedWashing = createDto.IsNeedWashing,
+        EstimatedFee = _feeCalculator.CalculateFee(DateTimeOffset.Now, DateTimeOffset.Now, createDto.IsNeedWashing),
+        Notes = createDto.Notes
+      };
 
-            var normalizedPlate = updateDto.MotorcycleLicensePlate.Trim().ToUpper();
-            var motorcycle = await _motorcycleRepository.GetByLicensePlateAsync(normalizedPlate);
+      var createdParkingRecord = await _repository.CreateAsync(parkingRecord);
+      var parkingRecordDto = _mapper.Map<ParkingRecordDto>(createdParkingRecord);
 
-            if (motorcycle == null)
-            {
-                motorcycle = new Motorcycle
-                {
-                    Id = Guid.NewGuid(),
-                    LicensePlate = normalizedPlate
-                };
-                await _motorcycleRepository.CreateAsync(motorcycle);
-            }
-
-            _mapper.Map(updateDto, existingParkingRecord);
-
-            existingParkingRecord.MotorcycleId = motorcycle.Id;
-
-            var timeToCalculateAgainst = existingParkingRecord.ExitTime ?? DateTimeOffset.Now;
-            existingParkingRecord.EstimatedFee = _feeCalculator.CalculateFee(
-                existingParkingRecord.EntryTime,
-                timeToCalculateAgainst,
-                existingParkingRecord.IsNeedWashing);
-
-            var updatedParkingRecord = await _repository.UpdateAsync(existingParkingRecord);
-            var parkingRecordDto = _mapper.Map<ParkingRecordDto>(updatedParkingRecord);
-
-            return ApiResponseDto<ParkingRecordDto>.SuccessResult(parkingRecordDto, "Successfully updated parking record");
-        }
-        catch (Exception ex)
-        {
-            return ApiResponseDto<ParkingRecordDto>.ErrorResult($"Could not update parking record: {ex.Message}");
-        }
+      return ApiResponseDto<ParkingRecordDto>.SuccessResult(parkingRecordDto, "Successfully added parking record");
     }
-
-    public async Task<ApiResponseDto<bool>> DeleteAsync(Guid id)
+    catch( Exception ex )
     {
-        try
-        {
-            var isExist = await _repository.ExistsAsync(id);
-
-            if (!isExist)
-            {
-                return ApiResponseDto<bool>.ErrorResult("Parking record not found");
-            }
-
-            await _repository.DeleteAsync(id);
-            return ApiResponseDto<bool>.SuccessResult(true, "Successfully deleted parking record");
-        }
-        catch (Exception ex)
-        {
-            return ApiResponseDto<bool>.ErrorResult($"Could not delete parking record: {ex.Message}");
-        }
+      return ApiResponseDto<ParkingRecordDto>.ErrorResult($"Could not create parking record: {ex.Message}");
     }
+  }
+
+  public async Task<ApiResponseDto<ParkingRecordDto>> UpdateAsync(Guid id, UpdateParkingRecordDto updateDto)
+  {
+    try
+    {
+      var existingParkingRecord = await _repository.GetByIdAsync(id);
+
+      if( existingParkingRecord == null )
+      {
+        return ApiResponseDto<ParkingRecordDto>.ErrorResult("Parking record not found");
+      }
+
+      var normalizedPlate = updateDto.MotorcycleLicensePlate.Trim().ToUpper();
+      var motorcycle = await _motorcycleRepository.GetByLicensePlateAsync(normalizedPlate);
+
+      if( motorcycle == null )
+      {
+        motorcycle = new Motorcycle
+        {
+          Id = Guid.NewGuid(),
+          LicensePlate = normalizedPlate
+        };
+        await _motorcycleRepository.CreateAsync(motorcycle);
+      }
+
+      _mapper.Map(updateDto, existingParkingRecord);
+
+      existingParkingRecord.MotorcycleId = motorcycle.Id;
+
+      var timeToCalculateAgainst = existingParkingRecord.ExitTime ?? DateTimeOffset.Now;
+      existingParkingRecord.EstimatedFee = _feeCalculator.CalculateFee(
+          existingParkingRecord.EntryTime,
+          timeToCalculateAgainst,
+          existingParkingRecord.IsNeedWashing);
+
+      var updatedParkingRecord = await _repository.UpdateAsync(existingParkingRecord);
+      var parkingRecordDto = _mapper.Map<ParkingRecordDto>(updatedParkingRecord);
+
+      return ApiResponseDto<ParkingRecordDto>.SuccessResult(parkingRecordDto, "Successfully updated parking record");
+    }
+    catch( Exception ex )
+    {
+      return ApiResponseDto<ParkingRecordDto>.ErrorResult($"Could not update parking record: {ex.Message}");
+    }
+  }
+
+  public async Task<ApiResponseDto<bool>> DeleteAsync(Guid id)
+  {
+    try
+    {
+      var isExist = await _repository.ExistsAsync(id);
+
+      if( !isExist )
+      {
+        return ApiResponseDto<bool>.ErrorResult("Parking record not found");
+      }
+
+      await _repository.DeleteAsync(id);
+      return ApiResponseDto<bool>.SuccessResult(true, "Successfully deleted parking record");
+    }
+    catch( Exception ex )
+    {
+      return ApiResponseDto<bool>.ErrorResult($"Could not delete parking record: {ex.Message}");
+    }
+  }
 }

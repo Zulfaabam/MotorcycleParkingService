@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
@@ -63,7 +64,7 @@ public class AuthController : ControllerBase
   }
 
   [HttpGet("me")]
-  [Microsoft.AspNetCore.Authorization.Authorize]
+  [Authorize]
   public async Task<IActionResult> GetCurrentUser()
   {
     var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

@@ -45,29 +45,29 @@ public static class SeedData
     }
 
     // Create sample user
-    // var userEmail = "user@todoapi.com";
-    // var sampleUser = await userManager.FindByEmailAsync(userEmail);
+    var userEmail = "user@parkir.com";
+    var sampleUser = await userManager.FindByEmailAsync(userEmail);
 
-    // if( sampleUser == null )
-    // {
-    //   sampleUser = new ApplicationUser
-    //   {
-    //     UserName = userEmail,
-    //     Email = userEmail,
-    //     FirstName = "API",
-    //     LastName = "User",
-    //     EmailConfirmed = true,
-    //     CreatedAt = DateTime.UtcNow
-    //   };
+    if( sampleUser == null )
+    {
+      sampleUser = new ApplicationUser
+      {
+        UserName = userEmail,
+        Email = userEmail,
+        FirstName = "User",
+        LastName = "User",
+        EmailConfirmed = true,
+        CreatedAt = DateTime.UtcNow
+      };
 
-    //   var result = await userManager.CreateAsync(sampleUser, "User123!");
+      var result = await userManager.CreateAsync(sampleUser, "User123!");
 
-    //   if( result.Succeeded )
-    //   {
-    //     await userManager.AddToRoleAsync(sampleUser, "User");
-    //     Console.WriteLine($"Sample user created successfully with email: {userEmail}");
-    //     Console.WriteLine("Default password: User123!");
-    //   }
-    // }
+      if( result.Succeeded )
+      {
+        await userManager.AddToRoleAsync(sampleUser, "User");
+        Console.WriteLine($"Sample user created successfully with email: {userEmail}");
+        Console.WriteLine("Default password: User123!");
+      }
+    }
   }
 }
