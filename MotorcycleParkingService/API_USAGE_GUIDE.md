@@ -210,7 +210,6 @@ Creates a new parking record. _(Requires Authentication)_
   ```json
   {
     "motorcycleLicensePlate": "B 1234 ABC",
-    "entryTime": "2026-07-08T08:00:00+07:00",
     "isNeedWashing": false,
     "notes": "Will be picked up tonight"
   }
@@ -315,7 +314,7 @@ curl -X GET "https://localhost:5001/api/Auth/me" \
 curl -X POST "https://localhost:5001/api/ParkingRecords" \
      -H "Authorization: Bearer [TOKEN]" \
      -H "Content-Type: application/json" \
-     -d "{\"motorcycleLicensePlate\":\"B 9999 XYZ\",\"entryTime\":\"2026-07-08T10:00:00+07:00\",\"isNeedWashing\":false,\"notes\":\"Helmet on mirror\"}" \
+     -d "{\"motorcycleLicensePlate\":\"B 9999 XYZ\",\"isNeedWashing\":false,\"notes\":\"Helmet on mirror\"}" \
      -k
 ```
 

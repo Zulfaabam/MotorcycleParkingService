@@ -2,19 +2,19 @@ import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   parkingApi,
+} from '../api/api'
+import { 
   type ParkingRecordDto,
   type CreateParkingRecordDto,
-  type UpdateParkingRecordDto,
-} from '../api/api'
+  type UpdateParkingRecordDto 
+} from '../types/index'
 import {
-  Bike,
   Search,
   RefreshCw,
   Plus,
   Droplets,
   CheckCircle,
   Trash2,
-  DollarSign,
   Calendar,
   Clock,
   EyeOff,
@@ -158,10 +158,8 @@ export const ParkingListPage: React.FC = () => {
     }
 
     if (modalMode === 'add') {
-      const entryTime = new Date().toISOString()
       checkInMutation.mutate({
         motorcycleLicensePlate: data.licensePlate.toUpperCase(),
-        entryTime,
         isNeedWashing: data.isNeedWashing,
         notes: data.notes,
       })
