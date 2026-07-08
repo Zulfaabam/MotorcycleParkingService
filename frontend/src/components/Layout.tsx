@@ -27,7 +27,7 @@ export const Layout: React.FC = () => {
               <Bike className='w-5 h-5' />
             </div>
             <span className='font-heading font-semibold text-lg tracking-tight'>
-              AbamsPark
+              AbamsParking
             </span>
           </Link>
 
@@ -69,7 +69,7 @@ export const Layout: React.FC = () => {
       <footer className='w-full border-t border-border py-6 text-center text-xs text-muted-foreground bg-background'>
         <div className='max-w-[1126px] mx-auto px-4 md:px-8'>
           <p>
-            © {new Date().getFullYear()} AbamsPark Parking System. All rights
+            © {new Date().getFullYear()} AbamsParking Parking System. All rights
             reserved.
           </p>
         </div>

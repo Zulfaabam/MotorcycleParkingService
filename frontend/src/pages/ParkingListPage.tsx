@@ -242,7 +242,7 @@ export const ParkingListPage: React.FC = () => {
             Parking Records
           </h1>
           <p className='text-sm text-muted-foreground mt-1'>
-            A list of parked motorcycles in AbamsPark
+            A list of parked motorcycles in AbamsParking
           </p>
         </div>
         <div className='flex gap-2'>
