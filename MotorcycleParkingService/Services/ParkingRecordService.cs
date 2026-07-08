@@ -7,11 +7,10 @@ public class ParkingRecordService : IParkingRecordService
     private readonly IParkingFeeCalculator _feeCalculator;
     private readonly IMapper _mapper;
 
-
     public ParkingRecordService(
-        IParkingRecordRepository repository, 
-        IMotorcycleRepository motorcycleRepository, 
-        IMapper mapper, 
+        IParkingRecordRepository repository,
+        IMotorcycleRepository motorcycleRepository,
+        IMapper mapper,
         IParkingFeeCalculator feeCalculator)
     {
         _repository = repository;
@@ -60,7 +59,6 @@ public class ParkingRecordService : IParkingRecordService
     {
         try
         {
-            // Look up or auto-create the motorcycle by license plate
             var normalizedPlate = createDto.MotorcycleLicensePlate.Trim().ToUpper();
             var motorcycle = await _motorcycleRepository.GetByLicensePlateAsync(normalizedPlate);
 
@@ -106,13 +104,27 @@ public class ParkingRecordService : IParkingRecordService
                 return ApiResponseDto<ParkingRecordDto>.ErrorResult("Parking record not found");
             }
 
+            var normalizedPlate = updateDto.MotorcycleLicensePlate.Trim().ToUpper();
+            var motorcycle = await _motorcycleRepository.GetByLicensePlateAsync(normalizedPlate);
+
+            if (motorcycle == null)
+            {
+                motorcycle = new Motorcycle
+                {
+                    Id = Guid.NewGuid(),
+                    LicensePlate = normalizedPlate
+                };
+                await _motorcycleRepository.CreateAsync(motorcycle);
+            }
+
             _mapper.Map(updateDto, existingParkingRecord);
 
+            existingParkingRecord.MotorcycleId = motorcycle.Id;
+
             var timeToCalculateAgainst = existingParkingRecord.ExitTime ?? DateTimeOffset.Now;
-            
             existingParkingRecord.EstimatedFee = _feeCalculator.CalculateFee(
-                existingParkingRecord.EntryTime, 
-                timeToCalculateAgainst, 
+                existingParkingRecord.EntryTime,
+                timeToCalculateAgainst,
                 existingParkingRecord.IsNeedWashing);
 
             var updatedParkingRecord = await _repository.UpdateAsync(existingParkingRecord);

@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
@@ -69,7 +70,7 @@ public class AuthController : ControllerBase
   [Microsoft.AspNetCore.Authorization.Authorize]
   public async Task<IActionResult> GetCurrentUser()
   {
-    var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
     if (string.IsNullOrEmpty(userId))
     {

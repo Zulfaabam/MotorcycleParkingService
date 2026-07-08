@@ -37,7 +37,9 @@ export const ParkingListPage: React.FC = () => {
   
   // Confirmation Modal State
   const [isConfirmOpen, setIsConfirmOpen] = useState(false)
+  const [pendingAction, setPendingAction] = useState<'delete' | 'checkout' | null>(null)
   const [recordToDelete, setRecordToDelete] = useState<string | null>(null)
+  const [recordToCheckout, setRecordToCheckout] = useState<ParkingRecordDto | null>(null)
 
   // Fetch parking records
   const {
@@ -190,6 +192,13 @@ export const ParkingListPage: React.FC = () => {
     setIsCheckInOpen(true)
   }
 
+  const handleCheckOutClick = (record: ParkingRecordDto) => {
+    setPendingAction('checkout')
+    setRecordToCheckout(record)
+    setRecordToDelete(null)
+    setIsConfirmOpen(true)
+  }
+
   const handleCheckOut = (record: ParkingRecordDto) => {
     const exitTime = new Date().toISOString()
     const data: UpdateParkingRecordDto = {
@@ -203,14 +212,31 @@ export const ParkingListPage: React.FC = () => {
   }
 
   const handleDeleteClick = (id: string) => {
+    setPendingAction('delete')
     setRecordToDelete(id)
+    setRecordToCheckout(null)
     setIsConfirmOpen(true)
   }
 
-  const confirmDelete = () => {
-    if (recordToDelete) {
+  const confirmAction = () => {
+    if (pendingAction === 'checkout' && recordToCheckout) {
+      handleCheckOut(recordToCheckout)
+      setIsConfirmOpen(false)
+      setPendingAction(null)
+      setRecordToCheckout(null)
+      return
+    }
+
+    if (pendingAction === 'delete' && recordToDelete) {
       deleteMutation.mutate(recordToDelete)
     }
+  }
+
+  const cancelConfirmAction = () => {
+    setIsConfirmOpen(false)
+    setPendingAction(null)
+    setRecordToDelete(null)
+    setRecordToCheckout(null)
   }
 
   const formatDate = (dateStr: string) => {
@@ -412,7 +438,7 @@ export const ParkingListPage: React.FC = () => {
                   <td className='p-4 font-medium text-foreground'>
                     {record.motorcycleBrandName || (
                       <span className='text-muted-foreground/60 text-xs italic'>
-                        Not verified
+                        Not specified
                       </span>
                     )}
                   </td>
@@ -466,7 +492,7 @@ export const ParkingListPage: React.FC = () => {
                     <div className='flex items-center justify-center gap-2'>
                       {!record.exitTime && (
                         <button
-                          onClick={() => handleCheckOut(record)}
+                          onClick={() => handleCheckOutClick(record)}
                           className='flex items-center gap-1 px-2.5 py-1 rounded bg-green-500/10 hover:bg-green-500/20 text-green-600 border border-green-500/30 text-xs font-semibold cursor-pointer transition-all'
                         >
                           <CheckCircle className='w-3.5 h-3.5' />
@@ -517,13 +543,17 @@ export const ParkingListPage: React.FC = () => {
       {/* Delete Confirmation Modal */}
       <ConfirmModal
         isOpen={isConfirmOpen}
-        title="Delete Parking Record"
-        message="Are you sure you want to delete this parking record? This action cannot be undone."
-        confirmText="Delete"
-        onConfirm={confirmDelete}
-        onCancel={() => setIsConfirmOpen(false)}
-        isProcessing={deleteMutation.isPending}
-        variant="danger"
+        title={pendingAction === 'checkout' ? 'Confirm Check Out' : 'Delete Parking Record'}
+        message={
+          pendingAction === 'checkout'
+            ? 'Are you sure you want to check out this motorcycle? The parking fee will be calculated and recorded.'
+            : 'Are you sure you want to delete this parking record? This action cannot be undone.'
+        }
+        confirmText={pendingAction === 'checkout' ? 'Check Out' : 'Delete'}
+        onConfirm={confirmAction}
+        onCancel={cancelConfirmAction}
+        isProcessing={pendingAction === 'checkout' ? checkOutMutation.isPending : deleteMutation.isPending}
+        variant={pendingAction === 'checkout' ? 'warning' : 'danger'}
       />
     </div>
   )

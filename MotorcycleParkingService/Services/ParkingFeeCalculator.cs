@@ -11,9 +11,7 @@ public class ParkingFeeCalculator : IParkingFeeCalculator
 
     public decimal CalculateFee(DateTimeOffset entryTime, DateTimeOffset exitTime, bool IsNeedWashing)
     {
-        // Convert to the local time zone of the parking lot if necessary
         // Assuming entryTime and exitTime are already in the correct offset (+07:00)
-        
         var entryDate = entryTime.Date;
         var exitDate = exitTime.Date;
 

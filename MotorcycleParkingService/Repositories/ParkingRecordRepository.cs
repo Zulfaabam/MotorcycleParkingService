@@ -13,6 +13,7 @@ public class ParkingRecordRepository : IParkingRecordRepository
     {
         return await _context.ParkingRecords
             .Include(p => p.Motorcycle)
+            .ThenInclude(m => m.Brand)
             // .OrderByDescending(p => p.EntryTime)
             .ToListAsync();
     }
@@ -21,6 +22,7 @@ public class ParkingRecordRepository : IParkingRecordRepository
     {
         return await _context.ParkingRecords
             .Include(p => p.Motorcycle)
+            .ThenInclude(m => m.Brand)
             .FirstOrDefaultAsync(p => p.Id == id);
     }
 
